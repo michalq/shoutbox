@@ -1,0 +1,5 @@
+class MessageCollection {
+    getAll() {
+        return [];
+    }
+}

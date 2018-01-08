@@ -1,16 +1,9 @@
-const BaseController = require('./BaseController');
+const BaseController = require('./baseController');
 
 /**
  *
  */
 class ShoutboxController extends BaseController {
-    /**
-     * Post single message to shoutbox.
-     */
-    postMessage() {
-        return this.sendNoContent();
-    }
-
     /**
      * Returns all available messages.
      */
