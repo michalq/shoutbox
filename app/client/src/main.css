@@ -1,0 +1,14 @@
+.Shoutbox-header {
+  background: #0275d8;
+  color: #fff;
+}
+
+.Shoutbox-title {
+  padding: 20px;
+  margin: 0;
+}
+
+.Shoutbox-messages {
+  background: #e1e2e1;
+  height: 700px;
+}
