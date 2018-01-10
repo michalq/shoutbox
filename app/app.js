@@ -5,7 +5,8 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     WebSocket = require('ws'),
     http = require('http'),
-    mysql = require('mysql');
+    mysql = require('mysql'),
+    url = require('url');
 
 const app = express();
 
@@ -38,17 +39,30 @@ app.use((err, req, res, next) => {
     res.render('error');
 });
 
+const port = process.env.PORT || 5000;
+app.set('port', port);
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
 
-wss.on('connection', ws => {
-    ws.on('message', message => {
-        console.log('received: %s', message);
-        ws.send(`Hello, you sent -> ${message}`);
-    });
+const WebSocketController = require('./controllers/wsShoutBoxController');
+wss.on('connection', (ws, req) => {
+    const location = url.parse(req.url, true);
 
-    ws.send('Hi there, I am a WebSocket server');
+    switch (location.pathname) {
+        case '/shoutbox':
+            const controller = new WebSocketController(req);
+            ws.on('message', message => {
+                const response = controller.postMessage(message);
+                response.then(resp => { ws.send(resp); console.log(resp); });
+            });
+            break;
+        default:
+            ws.close();
+            return;
+    }
+
+    ws.send('{"status":"connected"}');
 });
 
-
-module.exports = app;
+module.exports = server;

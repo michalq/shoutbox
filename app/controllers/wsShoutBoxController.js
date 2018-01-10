@@ -7,6 +7,10 @@ const UsernameValidator = require('../services/shoutbox/usernameValidator'),
  * Web Socket controller to manage shoutbox.
  */
 class WsShoutBoxController {
+    constructor(req) {
+        this.req = req;
+    }
+
     /**
      * Post single message to shoutbox.
      */
@@ -15,25 +19,13 @@ class WsShoutBoxController {
             messages: []
         };
 
-        if (typeof payload !== 'object') {
+        try {
+            payload = JSON.parse(payload);
+        } catch (e) {
             response.code = 400;
-            response.messages = ['Message is empty.'];
+            response.messages = ['Not JSON.'];
 
-            return response;
-        }
-
-        if (typeof payload.msg !== 'string') {
-            response.code = 400;
-            response.messages = ['Message is empty.'];
-
-            return response;
-        }
-
-        if (typeof payload.username !== 'string') {
-            response.code = 400;
-            response.message = ['Username is not specified.'];
-
-            return response;
+            return Promise.resolve(JSON.stringify(response));
         }
 
         const msgValidator = new MessageValidator(),
@@ -48,22 +40,22 @@ class WsShoutBoxController {
                 .concat(nameValidator.getMessage());
             response.code = 400;
 
-            return response;
+            return Promise.resolve(JSON.stringify(response));
         }
 
-        (new MessageModel())
+        return (new MessageModel())
             .setSenderUserAgent(this.req.headers['user-agent'])
             .setSenderName(username)
             .setSenderIp(this.req.ip)
             .setMessage(message)
-            .setSendDate(moment())
+            .setSendDate(1234) // TODO
             .add()
             .then(_ => {
-                return {code: 200};
+                return JSON.stringify({code: 200});
             }).catch(err => {
                 console.error(err);
 
-                return {code: 500};
+                return JSON.stringify({code: 500});
             });
     }
 }

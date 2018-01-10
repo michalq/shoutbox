@@ -1,14 +1,21 @@
-.Shoutbox-header {
+body {
+  background: #e1e2e1;
+}
+.shoutbox-header {
   background: #0275d8;
   color: #fff;
 }
 
-.Shoutbox-title {
+.shoutbox-title {
   padding: 20px;
   margin: 0;
 }
 
-.Shoutbox-messages {
-  background: #e1e2e1;
-  height: 700px;
+.shoutbox-messages {
+  margin-bottom: 70px;
+}
+
+.shoutbox-messages .message {
+  margin: 10px;
+  padding: 10px;
 }

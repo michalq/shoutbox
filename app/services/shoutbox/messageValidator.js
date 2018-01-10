@@ -1,6 +1,6 @@
 class MessageValidator {
     constructor() {
-        this.isValid = false;
+        this.valid = false;
         this.messages = [];
     }
 
@@ -9,10 +9,11 @@ class MessageValidator {
      * @returns {MsgValidator}
      */
     validate(message) {
-        this.isValid = true;
-        if (typeof payload.msg !== "string" || payload.msg.length === 0) {
+        this.valid = true;
+        if (typeof message !== "string" || message.length === 0) {
             this.messages.push('message must contain at least one char');
-            this.isValid = false;
+            this.valid = false;
+
             return this;
         }
 
@@ -23,7 +24,7 @@ class MessageValidator {
      * @returns {boolean}
      */
     isValid() {
-        return this.isValid;
+        return this.valid;
     }
 
     /**

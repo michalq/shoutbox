@@ -96,7 +96,9 @@ class MessageModel {
      * @returns {boolean}
      */
     add() {
-        return true;
+        return new Promise((resolve, reject) => {
+            return 'test'; // TODO
+        });
     }
 
     /**
