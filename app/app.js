@@ -71,16 +71,22 @@ wss.on('connection', (ws, req) => {
     switch (location.pathname) {
         case '/shoutbox':
             const controller = new WebSocketController(wss, ws, req);
-            ws.on('message', message => {
-                controller.postMessage(app, message);
-            });
+            ws.on('message', message => controller.postMessage(app, message));
             break;
         default:
+            ws.send(JSON.stringify({
+                code: 404,
+                state: "closing",
+                message: "Route " + location.pathname + "not found"
+            }));
             ws.close();
             return;
     }
 
-    ws.send('{"status":"connected"}');
+    ws.send(JSON.stringify({
+        code: 200,
+        state: "connected"
+    }));
 });
 
 module.exports = server;

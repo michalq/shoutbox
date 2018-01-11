@@ -41,12 +41,12 @@ class WsShoutBoxController {
         } catch (e) {
             response.code = 400;
             response.messages = ['Not JSON.'];
-            return Promise.resolve(JSON.stringify(response));
+            return this.sendResponse(response);
         }
 
         const msgValidator = new MessageValidator(),
             nameValidator = new UsernameValidator(),
-            message = MessageSanitizer.sanitize(payload.msg),
+            message = MessageSanitizer.sanitize(payload.message),
             username = payload.username;
 
         if (!msgValidator.validate(message).isValid() ||
@@ -54,7 +54,9 @@ class WsShoutBoxController {
         ) {
             response.messages = msgValidator.getMessages().concat(nameValidator.getMessage());
             response.code = 400;
-            return Promise.resolve(JSON.stringify(response));
+            console.log(response);
+
+            return this.sendResponse(response);
         }
 
         const timestamp = Math.floor(Date.now() / 1000);
@@ -66,12 +68,12 @@ class WsShoutBoxController {
             .setMessage(message)
             .setSendDate(timestamp)
             .save()
-            .then(_ => {
-                return JSON.stringify({code: 200});
-            })
             .then(resp => {
                 // Send confirmation to sender.
-                this.wsConnection.send(resp);
+                this.sendResponse({
+                    code: 200,
+                    state: "received"
+                });
                 // Send message to all nodes.
                 this.wsServer.broadcast(
                     WsShoutBoxController.getBroadcastResponse(username, message, timestamp)
@@ -80,8 +82,15 @@ class WsShoutBoxController {
             .catch(err => {
                 console.error("DB error: " + err);
 
-                return JSON.stringify({code: 500});
+                return this.sendResponse({code: 500});
             });
+    }
+
+    /**
+     * @param {object} response
+     */
+    sendResponse(response) {
+        this.wsConnection.send(JSON.stringify(response));
     }
 
     /**
@@ -93,6 +102,7 @@ class WsShoutBoxController {
      */
     static getBroadcastResponse(username, message, timestamp) {
         return JSON.stringify({
+            state: "new_msg",
             username: username,
             message: message,
             timestamp: timestamp

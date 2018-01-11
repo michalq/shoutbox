@@ -3,49 +3,57 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './main.css';
 import Form from "./Form";
 import Messages from "./Messages";
+import MessageService from "./services/messageService";
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            messages: this.getMessages()
+            messages: MessageService.getMessages()
         };
 
-        this.wsConnection = new WebSocket("ws://localhost:3000");
+        this.wsConnection = new WebSocket("ws://localhost:5000/shoutbox");
 
         this.wsConnection.onmessage = event => {
-            // const msg = JSON.parse(event.data);
-            console.log('test', event.data);
-        };
+            try {
+                const msg = JSON.parse(event.data);
+                this.manageWsActions(msg);
+            } catch (err) {
+                console.error(err);
+            }
 
-        this.wsConnection.onopen = event => {
-            console.log('Connected.');
+            console.log(event.data);
         };
     }
 
     /**
-     * Get initial messages from api.
-     * @returns {object[]}
+     * Manages web socket actions.
+     * @param msg
      */
-    getMessages() {
-        return [
-            {
-                key: "1",
-                username: "John Snow",
-                timestamp: "12:23",
-                message: "Lorem ipsum dolor sit amet."
-            },
-            {
-                key: "2",
-                username: "John Snow2",
-                timestamp: "3 days ago",
-                message: "Lorem ipsum dolor sit amet2."
-            }
-        ];
+    manageWsActions(msg) {
+        switch (msg.state) {
+            case "new_msg":
+                this.appendMessage(msg);
+                break;
+            case "closing":
+                break;
+            case "connected":
+                break;
+            case "received":
+                break;
+            default:
+                console.error("Unknown state.");
+        }
     }
 
+    /**
+     * @param {object} msg
+     */
     sendMessage(msg) {
-        console.log('another callback', msg.message, msg.username);
+        this.wsConnection.send(JSON.stringify({
+            message: msg.message,
+            username: msg.username
+        }));
     }
 
     /**
@@ -67,7 +75,7 @@ class App extends Component {
                 <Messages messages={this.state.messages}/>
                 <div className="fixed-bottom">
                     <div className="shoutbox-form">
-                        <Form sendMessageCallback={this.sendMessage}/>
+                        <Form sendMessageCallback={msg => this.sendMessage(msg)}/>
                     </div>
                 </div>
             </div>

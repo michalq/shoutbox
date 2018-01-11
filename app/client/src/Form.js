@@ -5,7 +5,7 @@ class Form extends Component {
         event.preventDefault();
 
         const message = this.refs.message.value;
-        const username = "test";
+        const username = "test123";
         this.refs.message.value = '';
 
         this.props.sendMessageCallback({
