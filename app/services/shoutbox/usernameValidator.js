@@ -17,7 +17,7 @@ class UsernameValidator {
             return this;
         }
 
-        if (name.length <= 5) {
+        if (name.length < 5) {
             this.messages.push('Username must contain at least 5 characters.');
             this.valid = false;
         }

@@ -10,13 +10,20 @@ const express = require('express'),
 
 const app = express();
 
+const dbConnection = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+});
+
 app.enable('trust proxy');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.set('view engine', 'jade');
-// app.use(express.static(path.join(__dirname, 'public')));
+app.set('db', dbConnection);
 
 // Setting routes.
 app.use('/', require('./routes/index'));
@@ -44,17 +51,28 @@ app.set('port', port);
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
-
 const WebSocketController = require('./controllers/wsShoutBoxController');
+
+/**
+ * Function to broadcasting to all nodes.
+ * @param {*} data
+ */
+wss.broadcast = data => {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+        }
+    });
+};
+
 wss.on('connection', (ws, req) => {
     const location = url.parse(req.url, true);
 
     switch (location.pathname) {
         case '/shoutbox':
-            const controller = new WebSocketController(req);
+            const controller = new WebSocketController(wss, ws, req);
             ws.on('message', message => {
-                const response = controller.postMessage(message);
-                response.then(resp => { ws.send(resp); console.log(resp); });
+                controller.postMessage(app, message);
             });
             break;
         default:

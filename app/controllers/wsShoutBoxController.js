@@ -7,14 +7,31 @@ const UsernameValidator = require('../services/shoutbox/usernameValidator'),
  * Web Socket controller to manage shoutbox.
  */
 class WsShoutBoxController {
-    constructor(req) {
+    /**
+     * @param {object} wss Websocket server object.
+     * @param {object} ws Websocket connection object.
+     * @param {object} req Request object.
+     */
+    constructor(wss, ws, req) {
+        this.wsServer = wss;
+        this.wsConnection = ws;
         this.req = req;
     }
 
     /**
-     * Post single message to shoutbox.
+     * @returns {string}
      */
-    postMessage(payload) {
+    getUserAgent() {
+        return this.req.headers['user-agent'];
+    }
+
+    /**
+     * Post single message to shoutbox.
+     *
+     * @param {object} app
+     * @param {string} payload
+     */
+    postMessage(app, payload) {
         const response = {
             messages: []
         };
@@ -24,7 +41,6 @@ class WsShoutBoxController {
         } catch (e) {
             response.code = 400;
             response.messages = ['Not JSON.'];
-
             return Promise.resolve(JSON.stringify(response));
         }
 
@@ -36,27 +52,51 @@ class WsShoutBoxController {
         if (!msgValidator.validate(message).isValid() ||
             !nameValidator.validate(username).isValid()
         ) {
-            response.messages = msgValidator.getMessages()
-                .concat(nameValidator.getMessage());
+            response.messages = msgValidator.getMessages().concat(nameValidator.getMessage());
             response.code = 400;
-
             return Promise.resolve(JSON.stringify(response));
         }
 
-        return (new MessageModel())
-            .setSenderUserAgent(this.req.headers['user-agent'])
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        return (new MessageModel(app.get('db')))
+            .setSenderUserAgent(this.getUserAgent())
             .setSenderName(username)
             .setSenderIp(this.req.ip)
             .setMessage(message)
-            .setSendDate(1234) // TODO
-            .add()
+            .setSendDate(timestamp)
+            .save()
             .then(_ => {
                 return JSON.stringify({code: 200});
-            }).catch(err => {
-                console.error(err);
+            })
+            .then(resp => {
+                // Send confirmation to sender.
+                this.wsConnection.send(resp);
+                // Send message to all nodes.
+                this.wsServer.broadcast(
+                    WsShoutBoxController.getBroadcastResponse(username, message, timestamp)
+                );
+            })
+            .catch(err => {
+                console.error("DB error: " + err);
 
                 return JSON.stringify({code: 500});
             });
+    }
+
+    /**
+     * @param {string} username
+     * @param {string} message
+     * @param {number} timestamp
+     *
+     * @returns {string}
+     */
+    static getBroadcastResponse(username, message, timestamp) {
+        return JSON.stringify({
+            username: username,
+            message: message,
+            timestamp: timestamp
+        });
     }
 }
 

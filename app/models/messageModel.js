@@ -1,5 +1,8 @@
-class MessageModel {
-    constructor() {
+const BaseModel = require('./baseModel');
+
+class MessageModel extends BaseModel {
+    constructor(app) {
+        super(app);
         this.senderName = '';
         this.senderIp = '';
         this.message = '';
@@ -95,9 +98,9 @@ class MessageModel {
     /**
      * @returns {boolean}
      */
-    add() {
+    save() {
         return new Promise((resolve, reject) => {
-            return 'test'; // TODO
+            resolve();
         });
     }
 
