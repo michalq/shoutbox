@@ -10,6 +10,7 @@ class BaseController {
      * @param {object} msg
      */
     sendOk(msg) {
+        this.res.header('Access-Control-Allow-Origin', "*");
         this.res.status = 200;
         this.res.json(msg);
     }

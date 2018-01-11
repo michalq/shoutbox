@@ -3,32 +3,32 @@ const BaseModel = require('./baseModel');
 class MessageModel extends BaseModel {
     constructor(app) {
         super(app);
-        this.senderName = '';
-        this.senderIp = '';
+        this.username = '';
+        this.ipAddr = '';
         this.message = '';
-        this.senderUserAgent = '';
-        this.sendDate = '';
+        this.userAgent = '';
+        this.postedAt = '';
     }
 
     /**
      * @returns {string}
      */
-    getSenderName() {
-        return this.senderName;
+    getUsername() {
+        return this.username;
     }
 
     /**
      * @returns {string}
      */
-    getSenderUserAgent() {
-        return this.senderUserAgent;
+    getUserAgent() {
+        return this.userAgent;
     }
 
     /**
      * @returns {string}
      */
-    getSenderIp() {
-        return this.senderIp;
+    getIpAddr() {
+        return this.ipAddr;
     }
 
     /**
@@ -41,36 +41,36 @@ class MessageModel extends BaseModel {
     /**
      * @returns {string}
      */
-    getSendDate() {
-        return this.sendDate;
+    getPostedAt() {
+        return this.postedAt;
     }
 
     /**
-     * @param {string} senderName
+     * @param {string} username
      * @returns {MessageModel}
      */
-    setSenderName(senderName) {
-        this.senderName = senderName;
+    setUsername(username) {
+        this.username = username;
 
         return this;
     }
 
     /**
-     * @params {string} senderUserAgent
+     * @params {string} userAgent
      * @returns {MessageModel}
      */
-    setSenderUserAgent(senderUserAgent) {
-        this.senderUserAgent = senderUserAgent;
+    setUserAgent(userAgent) {
+        this.userAgent = userAgent;
 
         return this;
     }
 
     /**
-     * @param {string} senderIp
+     * @param {string} ipAddr
      * @returns {MessageModel}
      */
-    setSenderIp(senderIp) {
-        this.senderIp = senderIp;
+    setIpAddr(ipAddr) {
+        this.ipAddr = ipAddr;
 
         return this;
     }
@@ -86,21 +86,47 @@ class MessageModel extends BaseModel {
     }
 
     /**
-     * @param {string} sendDate
+     * @param {string} postedAt
      * @returns {MessageModel}
      */
-    setSendDate(sendDate) {
-        this.sendDate = sendDate;
+    setPostedAt(postedAt) {
+        this.postedAt = postedAt;
 
         return this;
     }
 
     /**
-     * @returns {boolean}
+     * @param {number} id
+     * @returns {MessageModel}
+     */
+    setId(id) {
+        this.id = id;
+
+        return this;
+    }
+
+    /**
+     * @returns {Promise}
      */
     save() {
+        const sql = "INSERT INTO `shoutbox` (`username`, `user_agent`, `message`, `ip_addr`, `posted_at`) VALUES (?)";
+        const values = [[
+            this.getUsername(),
+            this.getUserAgent(),
+            this.getMessage(),
+            this.getIpAddr(),
+            parseInt(this.getPostedAt())
+        ]];
+
         return new Promise((resolve, reject) => {
-            resolve();
+            this.connect();
+            this.db.query(sql, values, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result.affectedRows);
+                }
+            });
         });
     }
 
@@ -113,11 +139,12 @@ class MessageModel extends BaseModel {
     static createFromRaw(rawObject) {
         const message = new MessageModel();
         message
+            .setId(rawObject.id)
             .setMessage(rawObject.message)
-            .setSenderIp(rawObject.sender_ip)
-            .setSenderName(rawObject.sender_name)
-            .setSenderUserAgent(rawObject.sender_user_agent)
-            .setSendDate(moment());
+            .setIpAddr(rawObject.ip_addr)
+            .setUsername(rawObject.username)
+            .setUserAgent(rawObject.user_agent)
+            .setPostedAt(rawObject.posted_at);
 
         return message;
     }

@@ -5,7 +5,7 @@ class Form extends Component {
         event.preventDefault();
 
         const message = this.refs.message.value;
-        const username = "test123";
+        const username = this.refs.username.value;
         this.refs.message.value = '';
 
         this.props.sendMessageCallback({
@@ -18,6 +18,7 @@ class Form extends Component {
         return (
             <form action="" className="form-inline" onSubmit={e => { this.sendMessage(e) }}>
                 <div className="form-group">
+                    <input className={"w-25 form-control form-control-lg"} type="text" ref="username" placeholder={"Your name …"} />
                     <input className={"form-control form-control-lg"} type="text" ref="message" placeholder={"Type message …"} />
                     <button className={"btn btn-lg btn-primary"} type="submit">Send</button>
                 </div>

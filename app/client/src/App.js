@@ -9,8 +9,17 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            messages: MessageService.getMessages()
+            messages: []
         };
+
+        MessageService.getMessages()
+            .then(msgs => {
+                this.state = {
+                    messages: msgs.data.reverse()
+                };
+
+                this.setState({messages: this.state.messages});
+            });
 
         this.wsConnection = new WebSocket("ws://localhost:5000/shoutbox");
 
@@ -40,7 +49,7 @@ class App extends Component {
             case "received":
                 break;
             default:
-                console.error("Unknown state.");
+                console.error("Unknown state.", msg.state);
         }
     }
 

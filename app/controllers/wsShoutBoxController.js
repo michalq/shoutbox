@@ -1,7 +1,8 @@
 const UsernameValidator = require('../services/shoutbox/usernameValidator'),
     MessageValidator = require('../services/shoutbox/messageValidator'),
     MessageSanitizer = require('../services/shoutbox/messageSanitizer'),
-    MessageModel = require('../models/messageModel');
+    MessageModel = require('../models/messageModel'),
+    MessageCollection = require('../models/messageCollection');
 
 /**
  * Web Socket controller to manage shoutbox.
@@ -23,6 +24,13 @@ class WsShoutBoxController {
      */
     getUserAgent() {
         return this.req.headers['user-agent'];
+    }
+
+    /**
+     * @returns {string}
+     */
+    getIp() {
+        return this.req.ip;
     }
 
     /**
@@ -62,11 +70,11 @@ class WsShoutBoxController {
         const timestamp = Math.floor(Date.now() / 1000);
 
         return (new MessageModel(app.get('db')))
-            .setSenderUserAgent(this.getUserAgent())
-            .setSenderName(username)
-            .setSenderIp(this.req.ip)
+            .setUserAgent(this.getUserAgent())
+            .setUsername(username)
+            .setIpAddr(this.getIp())
             .setMessage(message)
-            .setSendDate(timestamp)
+            .setPostedAt(timestamp)
             .save()
             .then(resp => {
                 // Send confirmation to sender.
@@ -105,7 +113,7 @@ class WsShoutBoxController {
             state: "new_msg",
             username: username,
             message: message,
-            timestamp: timestamp
+            postedAt: timestamp
         });
     }
 }

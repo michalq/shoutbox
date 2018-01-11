@@ -1,5 +1,6 @@
 const BaseController = require('./baseController');
-
+const MessageCollection = require('../models/messageCollection');
+const MAX_ENTRIES = 10;
 /**
  *
  */
@@ -8,29 +9,21 @@ class ShoutboxController extends BaseController {
      * Returns all available messages.
      */
     getMessages() {
-        return this.sendOk({
-            data: [
-                {
-                    time: 1234,
-                    userName: 'xyz123',
-                    content: 'Lorem ipsum dolor sit amet.'
-                }
-            ]
-        });
-    }
+        const collection = new MessageCollection(this.req.app.get('db'));
+        const messages = collection.getAll(MAX_ENTRIES);
 
-    /**
-     * Returns all participants.
-     */
-    getParticipants() {
-        return this.sendOk({
-            data: [
-                {
-                    since: 1234,
-                    userName: 'gal_anonim'
-                }
-            ]
-        })
+        messages.then(data => {
+            const msgs = [];
+            data.forEach(val => {
+                msgs.push({
+                    postedAt: val.getPostedAt(),
+                    username: val.getUsername(),
+                    message: val.getMessage()
+                });
+            });
+
+            return this.sendOk({data: msgs});
+        });
     }
 }
 

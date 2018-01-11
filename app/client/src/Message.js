@@ -6,7 +6,7 @@ import moment from 'moment'
  */
 class Message extends Component {
     getFormattedTimestamp() {
-        const date = moment.unix(this.props.timestamp);
+        const date = moment.unix(this.props.postedAt);
         return date.format('YYYY-MM-DD HH:mm:ss');
     }
 

@@ -12,9 +12,9 @@ class Messages extends Component {
                     Object.keys(this.props.messages).map(key => {
                         const msg = this.props.messages[key];
                         return <Message
-                            key={msg.key}
+                            key={msg.postedAt + msg.username}
                             message={msg.message}
-                            timestamp={msg.timestamp}
+                            postedAt={msg.postedAt}
                             username={msg.username} />
                     })
                 }

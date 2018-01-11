@@ -1,14 +1,17 @@
 class BaseModel {
     constructor(db) {
         this.db = db;
+    }
+
+    connect() {
         this.db.connect(err => {
-            console.log(err.code);
+            console.log(err);
         });
     }
 
     disconnect() {
-        this.db.disconnect(err => {
-            console.error(err.code);
+        this.db.end(err => {
+            console.error(err);
         });
     }
 }
