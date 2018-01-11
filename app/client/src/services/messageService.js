@@ -8,7 +8,7 @@ class MessageService {
                 key: "1",
                 username: "John Snow",
                 timestamp: "12:23",
-                message: "Lorem ipsum dolor sit amet."
+                message: "test https://google.pl test https://g2a.com/fdsafdsa fdsafdsa https://onet.pl/vcxzvcxzdffsa/fdsafdsa fdsa"
             },
             {
                 key: "2",

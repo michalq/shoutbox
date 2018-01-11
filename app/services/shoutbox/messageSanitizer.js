@@ -5,7 +5,23 @@ class MessageSanitizer {
      */
     static sanitize(message) {
         // todo remove null byte
-        return message;
+        return MessageSanitizer.clearHtml(message);
+    }
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    static clearHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 }
 

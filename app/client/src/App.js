@@ -21,8 +21,6 @@ class App extends Component {
             } catch (err) {
                 console.error(err);
             }
-
-            console.log(event.data);
         };
     }
 
@@ -62,6 +60,7 @@ class App extends Component {
      * @param {object} message
      */
     appendMessage(message) {
+        message.key = message.username + message.timestamp;
         this.state.messages.push(message);
         this.setState({messages: this.state.messages});
     }
