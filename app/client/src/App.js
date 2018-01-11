@@ -77,9 +77,6 @@ class App extends Component {
     render() {
         return (
             <div className="shoutbox">
-                <header className="shoutbox-header">
-                    <h1 className="shoutbox-title">Conversation</h1>
-                </header>
                 <Messages messages={this.state.messages}/>
                 <div className="fixed-bottom">
                     <div className="shoutbox-form">
